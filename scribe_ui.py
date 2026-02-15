@@ -2,7 +2,6 @@ import streamlit as st
 from groq import Groq
 
 # --- INITIALIZATION ---
-# Using Streamlit secrets for safe cloud deployment
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 # --- PAGE CONFIGURATION ---
@@ -57,7 +56,7 @@ st.markdown("""
     <div class="beta-warning">
         ⚠️ BETA TESTING MODE: This application is currently running on a public API. 
         <b>DO NOT enter real patient names, DOBs, or any identifying Protected Health Information (PHI).</b> 
-        Use dummy identifiers (e.g., "Patient X") for testing purposes.
+        Use dummy identifiers (e.g., "Mickey Mouse" or "Patient X") for testing purposes.
     </div>
 """, unsafe_allow_html=True)
 
@@ -77,7 +76,7 @@ CRITICAL RULES:
 # --- USER INPUT ---
 st.subheader("📝 Raw Dictation")
 dictation_input = st.text_area(
-    "Paste or type the patient dictation below:", 
+    "Paste or type the patient dictation below. (Tip: Use your device's native microphone to dictate!)", 
     height=200, 
     placeholder="Example: Patient is a 45-year-old male coming in today complaining of a sore throat for the last 3 days. Vitals are stable, BP 120/80..."
 )
@@ -87,35 +86,30 @@ if st.button("Generate SOAP Note", type="primary", use_container_width=True):
     if dictation_input.strip():
         with st.spinner("Structuring clinical note..."):
             try:
-                # Call the Groq API
                 response = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": scribe_prompt},
                         {"role": "user", "content": dictation_input}
                     ],
                     model="llama-3.3-70b-versatile",
-                    temperature=0.2, # Keeps the AI strictly factual, no creative hallucination
+                    temperature=0.2, 
                     max_tokens=1000
                 )
                 
                 st.subheader("📋 Structured SOAP Note")
                 structured_note = response.choices[0].message.content
                 
-                # Instructions for the user
-                st.success("✅ Note generated successfully!")
+                # Success message and instructions for the clipboard
+                st.success("✅ Note generated successfully! Hover over the box below and click the copy icon in the top right corner to copy to your clipboard.")
                 
-                # 1. THE COPY PIPELINE
-                st.markdown("**Option 1:** Hover over the box below and click the copy icon in the top right corner to copy to your clipboard.")
+                # Using st.code with language="text" provides a native, clean copy-to-clipboard button
                 st.code(structured_note, language="text")
                 
-                st.markdown("---")
-                
-                # 2. THE DOWNLOAD PIPELINE
-                st.markdown("**Option 2:** Download the note directly to your computer as a text file.")
+                # The Download Button
                 st.download_button(
                     label="📥 Download as Text File",
                     data=structured_note,
-                    file_name="SOAP_Note_Draft.txt",
+                    file_name="SOAP_Note.txt",
                     mime="text/plain",
                     use_container_width=True
                 )
