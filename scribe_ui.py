@@ -61,7 +61,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- SYSTEM PROMPT ---
-system_prompt = """
+scribe_prompt = """
 You are an elite Clinical Documentation Improvement (CDI) Specialist and Certified Medical Coder. 
 Your primary function is to listen to raw, unstructured physician dictation and transform it into a highly structured, perfectly formatted, and billing-ready clinical note.
 
